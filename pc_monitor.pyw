@@ -291,7 +291,7 @@ class EVENT_RECORD(ctypes.Structure):
 
 class EVENT_TRACE_LOGFILEW(ctypes.Structure):
     # CurrentEvent(EVENT_TRACE)와 LogfileHeader(TRACE_LOGFILE_HEADER)는 쓰지 않아서 크기만 맞춘다(64비트 기준)
-    _fields_ = [("LoggerName", ctypes.c_wchar_p), ("LogFileName", ctypes.c_wchar_p), ("CurrentTime", ctypes.c_int64),
+    _fields_ = [("LogFileName", ctypes.c_wchar_p), ("LoggerName", ctypes.c_wchar_p), ("CurrentTime", ctypes.c_int64),
                 ("BuffersRead", wt.ULONG), ("ProcessTraceMode", wt.ULONG), ("CurrentEvent", ctypes.c_uint64 * 11),
                 ("LogfileHeader", ctypes.c_uint64 * 35), ("BufferCallback", ctypes.c_void_p), ("BufferSize", wt.ULONG),
                 ("Filled", wt.ULONG), ("EventsLost", wt.ULONG), ("EventRecordCallback", ctypes.c_void_p),
@@ -944,7 +944,8 @@ class Monitor:
             split = details.get("net_split", {})
             sections.append(("네트워크 대역폭", "net", C_DOWN, None))
         else:
-            sections.append(("TCP 연결 수 (대역폭은 관리자 실행 필요)", "conns", C_DOWN, lambda v: f"{v}개"))
+            why = "대역폭 측정 실패" if is_admin() else "대역폭은 관리자 실행 필요"
+            sections.append((f"TCP 연결 수 ({why})", "conns", C_DOWN, lambda v: f"{v}개"))
         sections = [s for s in sections if s[1] != "gpu" or GPU is not None]
 
         # 높이는 모니터 해상도의 절반으로 고정하고, 그 안에 들어가는 만큼만 순위를 보여준다
